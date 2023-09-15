@@ -153,7 +153,7 @@ def get_example_map():
     
 def main():
     #TODO: Visualizer
-    map = MapFileReaderWriter().read_map("exmple.map")
+    map = MapFileReaderWriter().read_map("example.map")
 
     pass
 
