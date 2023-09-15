@@ -148,9 +148,13 @@ class State:
     def move(self, action : CardinalDirections):
         self.agent.map_position += action
 
-
+def get_example_map():
+    return Map(5,5, [Position(0,3),Position(1,3),Position(2,2), Position(2,0), Position(4,3)], [Position(2,3),Position(4,2)])
+    
 def main():
     #TODO: Visualizer
+    map = MapFileReaderWriter().read_map("exmple.map")
+
     pass
 
 if (__name__ == '__main__'):
