@@ -30,7 +30,56 @@ class State:
     
     def copy(self):
         return State(self.agent, self.map)
+
+class StateMachine:
+    def __init__(self, state : State, screen) -> None:
+        self.state = state
+        self.screen = screen
     
+    def refresh_screen(self, state):
+        #time.sleep(1)
+        self.screen.fill((255,255,255))
+        draw_map(self.screen, state.map, state.agent, history_of_agents_positions)
+        pygame.display.flip()
+
+    def DFS(self, limit = -1):
+        #TODO: Rewrite this method to look like BFS but based on stack
+        def DFS_2(self, stack, limit):
+            if(stack[-1].is_final()):
+                return stack[-1].agent
+            elif (stack[-1].is_exit()):
+                return None
+            if(limit == 0):
+                return None
+            for diraction in stack[-1].posible_actions():
+                stack.append(stack[-1].move(diraction))
+                self.refresh_screen(stack[-1])
+                result = DFS_2(self, stack, limit - 1)
+                if(result is not None):
+                    return result
+                stack.pop()
+                self.refresh_screen(stack[-1])
+        stack = list()
+        stack.append(self.state)
+        return DFS_2(self, stack, limit)
+                
+    def BFS(self, limit = -1):
+        quene = list()
+        quene.append(self.state)
+        while len(quene) != 0:
+            current_state = quene.pop(0)
+            self.refresh_screen(current_state)
+            if current_state.is_final():
+                return current_state.agent
+            elif current_state.is_exit():
+                continue
+            if(len(current_state.agent.position_visited) == limit + 1):
+                continue
+            for direction in current_state.posible_actions():
+                next_state = current_state.move(direction)
+                quene.append(next_state)
+        return None
+
 def get_example_map():
     return Map(5,5, [Position(0,1),Position(1,1),Position(2,2), Position(2,4), Position(4,1)], [Position(2,1),Position(4,2)])
     
@@ -44,6 +93,12 @@ def main():
     screen.fill((255,255,255))
     draw_map(screen, map, agent, history_of_agents_positions)
     pygame.display.flip()
+    agent = StateMachine(state, screen).BFS(9)
+    while(True):
+        time.sleep(1)
+        screen.fill((255,255,255))
+        draw_map(screen, map, agent, history_of_agents_positions)
+        pygame.display.flip()
     pass
 
 if (__name__ == '__main__'):
