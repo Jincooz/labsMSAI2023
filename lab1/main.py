@@ -24,8 +24,7 @@ class Position:
         return Position(self.x + other.value[0], self.y + other.value[1])
     
     def __str__(self) -> str:
-        return "(" + str(self.x) + ", " + str(self.y) + ")" 
-    
+        return "(" + str(self.x) + ", " + str(self.y) + ")"    
 
 class Map:
     def __init__(self, map_width, map_height, exit_positions, treasure_positions) -> None:
@@ -86,6 +85,48 @@ class Map:
             posible_moves.append(CardinalDirections.DOWN)
         return posible_moves
 
+class MapFileReaderWriter:
+    def read_map(self, file_path) -> Map:
+        try:
+            file = open(file_path, "r")
+            map_width = int(file.read(1))
+            map_height = int(file.read(1))
+            amount_of_exits = int(file.read(1))
+            amount_of_treasures = int(file.read(1))
+            exit_positions = []
+            treasure_positions = []
+            for _ in range(amount_of_exits):
+                exit_x = int(file.read(1))
+                exit_y = int(file.read(1))
+                exit_positions.append(Position(exit_x, exit_y))
+            for _ in range(amount_of_treasures):
+                treasure_x = int(file.read(1))
+                treasure_y = int(file.read(1))
+                treasure_positions.append(Position(treasure_x, treasure_y))
+            last = file.read()
+            if last != '':
+                raise Exception()
+        except FileNotFoundError:
+            raise Exception("File not found")
+        except Exception:
+            raise Exception("File corrupted")
+        finally:
+            file.close()
+        return Map(map_width, map_height, exit_positions, treasure_positions)
+    
+    def write_map(self, file_path, map : Map) -> None:
+        with open(file_path, "w") as file:
+            file.write(str(map.map_width))
+            file.write(str(map.map_height))
+            file.write(str(len(map.exit_positions)))
+            file.write(str(len(map.treasure_positions)))
+            for exit_position in map.exit_positions:
+                file.write(str(exit_position.x))
+                file.write(str(exit_position.y))
+            for treasure_position in map.treasure_positions:
+                file.write(str(treasure_position.x))
+                file.write(str(treasure_position.y))
+
 class Agent:
     def __init__(self, agent_position : Position) -> None:
         self.map_position = agent_position
@@ -107,9 +148,10 @@ class State:
     def move(self, action : CardinalDirections):
         self.agent.map_position += action
 
+
 def main():
-    p = Position(0, 0)
-    print(p + CardinalDirections.UP)
+    #TODO: Visualizer
+    pass
 
 if (__name__ == '__main__'):
     main()
