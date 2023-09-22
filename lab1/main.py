@@ -1,11 +1,12 @@
 from enum import Enum
-import pygame
+import simpleai
 import time
 
 from map import *
 import mapFileReaderWriter
-from titlemap import draw_map
 from agent import Agent
+
+from simpleai.search import SearchProblem, astar, breadth_first
 
 history_of_agents_positions = set()
 class State:
@@ -30,14 +31,26 @@ class State:
     
     def copy(self):
         return State(self.agent, self.map)
+    
+    def __str__(self) -> str:
+        return str(self.agent.map_position)
+
+class MapTreasureProblem(SearchProblem):
+    def actions(self, state):
+        if(state.is_exit()):
+            return []
+        return state.posible_actions()
+
+    def result(self, state, action):
+        return state.move(action)
+
+    def is_goal(self, state):
+        return state.is_final()
 
 class StateMachine:
     def __init__(self, state : State, screen) -> None:
         self.state = state
-        self.screen = screen
-    
-    def refresh_screen(self, state):
-        #time.sleep(1)
+        time.sleep(1)
         self.screen.fill((255,255,255))
         draw_map(self.screen, state.map, state.agent, history_of_agents_positions)
         pygame.display.flip()
@@ -85,23 +98,17 @@ def get_example_map():
     
 def get_example_map2():
     return Map(5,5, [Position(0,1),Position(1,1),Position(2,2), Position(2,4), Position(4,1),Position(2,1)], [Position(0,0)])
+
 def main():
-    map = mapFileReaderWriter.read_map("lab1/example.map")
+    map = get_example_map()
     agent = Agent(Position(0,3))
     state = State(agent, map)
-    screen = pygame.display.set_mode((640, 480))
-    screen.fill((255,255,255))
-    draw_map(screen, map, agent, history_of_agents_positions)
-    pygame.display.flip()
-    agent = StateMachine(state, screen).BFS(9)
-    while(True):
-        time.sleep(1)
-        screen.fill((255,255,255))
-        draw_map(screen, map, agent, history_of_agents_positions)
-        pygame.display.flip()
-    pass
+    problem = MapTreasureProblem(initial_state = state)
+    result = breadth_first(problem)
+
+    print(result.state)
+    for element in result.path():
+        print("("+str(element[0])+"), "+str(element[1])) 
 
 if (__name__ == '__main__'):
-    pygame.init()
     main()
-pygame.quit()
